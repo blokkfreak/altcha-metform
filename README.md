@@ -23,25 +23,25 @@ Dieses Plugin integriert das quelloffene ALTCHA-System direkt in den Validierung
 ```mermaid
 sequenceDiagram
     autonumber
-    actor User as Browser / Frontend
-    participant WP as WordPress REST API (/challenge)
-    participant ALT as ALTCHA Server
-    participant Val as MetForm Validierung (PHP)
+    actor Client as Browser
+    participant WP as WordPress REST-API
+    participant Srv as ALTCHA-Server
+    participant Val as MetForm-Validierung
 
-    User->>WP: GET /wp-json/altcha/v1/challenge
-    WP->>ALT: Proxy-Anfrage (umgeht CORS)
-    ALT-->>WP: Challenge Payload
-    WP-->>User: Challenge Payload
-    Note over User: Client berechnet PoW im Hintergrund
-    User->>Val: Formular absenden + Payload (mf_altcha)
-    Val->>Val: 1. Ablaufzeit (Expires) prüfen
-    Val->>Val: 2. Replay-Schutz via Transients prüfen
-    Val->>Val: 3. HMAC-Signatur verifizieren
-    Val->>Val: 4. Proof of Work (SHA-256) prüfen
+    Client->>WP: GET /wp-json/altcha/v1/challenge
+    WP->>Srv: Challenge anfordern (CORS-Proxy)
+    Srv-->>WP: Challenge Payload
+    WP-->>Client: Challenge Payload
+    Note over Client: Proof of Work im Hintergrund berechnen
+    Client->>Val: Formular absenden mit Cookie (mf_altcha)
+    Val->>Val: Ablaufzeit pruefen
+    Val->>Val: Replay-Schutz pruefen (Transients)
+    Val->>Val: HMAC-Signatur verifizieren
+    Val->>Val: Proof of Work pruefen
     alt Erfolgreich
-        Val-->>User: Formular gespeichert & Bestätigung
-    else Ungültig / Replay
-        Val-->>User: Fehler zurückgeben
+        Val-->>Client: Formular gespeichert
+    else Ungueltig oder Replay
+        Val-->>Client: Fehlermeldung
     end
 ```
 
